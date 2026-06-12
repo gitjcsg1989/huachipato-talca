@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Escuela de Fútbol Huachipato — Filial Talca
 
-## Getting Started
+Sitio web institucional + panel de gestión interna para la Escuela de Fútbol
+Huachipato, filial Talca.
 
-First, run the development server:
+- **Público:** inicio, noticias, categorías, cuerpo técnico, galería, tienda e
+  inscripciones.
+- **Privado (`/dashboard`):** jugadores, inscripciones, mensualidades, finanzas
+  y gestión de usuarios.
+
+Stack: Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · shadcn/ui ·
+Supabase (Auth + Postgres) · Drizzle ORM · Sanity v3 · Resend · Recharts.
+
+---
+
+## Requisitos
+
+- Node.js 20+
+- pnpm 9+
+- Cuentas en: [Supabase](https://supabase.com), [Sanity](https://sanity.io),
+  [Resend](https://resend.com) y [Vercel](https://vercel.com) (deploy).
+
+## Puesta en marcha
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+cp .env.example .env.local   # completar con las claves reales
+pnpm dev                     # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+La app **compila y corre sin credenciales** (las páginas con datos aparecen
+vacías). Para funcionalidad completa, configura los servicios:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1. Supabase
+1. Crea un proyecto en supabase.com.
+2. SQL Editor → pega y ejecuta `supabase/schema.sql` (tablas + RLS + categorías seed).
+3. Authentication → habilita Email/Password y **desactiva** "Confirm email"
+   (los usuarios son internos, no hay registro público).
+4. Settings → API: copia `URL`, `anon key` y `service_role key` a `.env.local`.
+5. Settings → Database → Connection string (URI): cópiala a `DATABASE_URL`.
+6. Crea el primer usuario en Authentication → Users, y luego inserta su perfil:
+   ```sql
+   insert into profiles (id, nombre, email, rol)
+   values ('<uuid-del-usuario>', 'Tu Nombre', 'tu@email.cl', 'superadmin');
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. Sanity
+1. Crea un proyecto en sanity.io/manage y copia `projectId` a `.env.local`.
+2. El Studio está embebido en `/studio` — entra ahí para cargar contenido
+   (noticias, categorías públicas, cuerpo técnico, productos, ajustes del sitio).
+3. Genera un token de escritura (API → Tokens) y un webhook secret.
+4. Configura el webhook (API → Webhooks) apuntando a
+   `https://<tu-dominio>/api/webhooks/sanity` con el secret, para revalidar ISR.
 
-## Learn More
+### 3. Resend
+1. Crea una API key y verifica tu dominio remitente.
+2. Completa `RESEND_API_KEY`, `RESEND_FROM_EMAIL` y `ADMIN_NOTIFICATION_EMAIL`.
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Comando | Descripción |
+|---------|-------------|
+| `pnpm dev` | Desarrollo |
+| `pnpm build` | Build de producción |
+| `pnpm start` | Servir build |
+| `pnpm lint` | ESLint |
+| `pnpm type-check` | TypeScript sin emitir |
+| `pnpm db:push` | Aplica el schema Drizzle (sin RLS — preferir `schema.sql`) |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploy en Vercel
+1. Sube el repo a GitHub y conéctalo en vercel.com/new.
+2. Agrega todas las variables de `.env.example` en Project → Settings → Env.
+3. El build corre TypeScript + ESLint; si fallan, el deploy no pasa.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Más detalle de arquitectura y convenciones en [`CLAUDE.md`](./CLAUDE.md).

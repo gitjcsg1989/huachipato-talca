@@ -1,0 +1,86 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { getNoticiaPorSlug } from "@/lib/data/contenido";
+import { formatFecha } from "@/lib/utils";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const noticia = await getNoticiaPorSlug(slug);
+  if (!noticia) return { title: "Noticia no encontrada" };
+  return {
+    title: noticia.titulo,
+    description: noticia.extracto ?? undefined,
+    openGraph: noticia.imagenUrl ? { images: [noticia.imagenUrl] } : undefined,
+  };
+}
+
+export default async function NoticiaPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const noticia = await getNoticiaPorSlug(slug);
+  if (!noticia || !noticia.publicada) notFound();
+
+  const parrafos = (noticia.contenido ?? "")
+    .split(/\n{2,}|\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  return (
+    <article className="mx-auto max-w-3xl px-5 py-12 lg:px-8">
+      <Link
+        href="/noticias"
+        className="mb-8 inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-white"
+      >
+        <ArrowLeft size={15} />
+        Volver a noticias
+      </Link>
+
+      {noticia.categoria && (
+        <span className="text-xs font-semibold uppercase tracking-wider text-brand-soft">
+          {noticia.categoria}
+        </span>
+      )}
+      <h1 className="mt-2 text-3xl font-black leading-tight text-white sm:text-4xl">
+        {noticia.titulo}
+      </h1>
+      <time className="mt-3 block text-sm text-white/40">
+        {formatFecha(noticia.fecha)}
+      </time>
+
+      {noticia.imagenUrl && (
+        <div className="relative mt-8 aspect-[2/1] overflow-hidden rounded-xl">
+          <Image
+            src={noticia.imagenUrl}
+            alt={noticia.titulo}
+            fill
+            priority
+            sizes="(max-width:768px) 100vw, 768px"
+            className="object-cover"
+          />
+        </div>
+      )}
+
+      <div className="mt-8 space-y-4">
+        {parrafos.length > 0 ? (
+          parrafos.map((p, i) => (
+            <p key={i} className="leading-relaxed text-white/70">
+              {p}
+            </p>
+          ))
+        ) : (
+          <p className="text-white/40">Esta noticia no tiene contenido.</p>
+        )}
+      </div>
+    </article>
+  );
+}
