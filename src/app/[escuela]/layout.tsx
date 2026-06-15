@@ -19,8 +19,8 @@ export default async function PublicLayout({
       className="flex min-h-screen flex-col bg-ink text-white"
       style={
         {
-          "--color-brand": escuela.colorPrimary,
-          "--color-brand-soft": escuela.colorPrimarySoft,
+          "--brand": escuela.colorPrimary,
+          "--brand-soft": escuela.colorPrimarySoft,
         } as React.CSSProperties
       }
     >
