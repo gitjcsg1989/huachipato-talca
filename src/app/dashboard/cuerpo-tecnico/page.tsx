@@ -2,10 +2,11 @@ import { requireProfile } from "@/lib/auth/guards";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { CuerpoTecnicoAdmin } from "@/components/dashboard/CuerpoTecnicoAdmin";
 import { getCuerpoTecnico } from "@/lib/data/contenido";
+import { getEscuelaActivaId } from "@/lib/data/escuelas";
 
 export default async function CuerpoTecnicoDashboardPage() {
   const profile = await requireProfile();
-  const miembros = await getCuerpoTecnico();
+  const miembros = await getCuerpoTecnico(await getEscuelaActivaId());
 
   return (
     <>

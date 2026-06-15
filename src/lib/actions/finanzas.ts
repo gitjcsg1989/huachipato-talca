@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { checkRole } from "@/lib/auth/guards";
+import { getEscuelaActivaId } from "@/lib/data/escuelas";
 import { movimientoSchema } from "@/lib/validators";
 
 export type ActionResult = { ok: boolean; error?: string };
@@ -29,9 +30,12 @@ export async function registrarIngreso(
     return { ok: false, error: parsed.error.issues[0]?.message };
   }
   const d = parsed.data;
+  const escuelaId = await getEscuelaActivaId();
+  if (!escuelaId) return { ok: false, error: "Sin escuela activa" };
 
   const supabase = await createClient();
   const { error } = await supabase.from("ingresos").insert({
+    escuela_id: escuelaId,
     concepto: d.concepto,
     categoria: d.categoria,
     monto: d.monto,
@@ -66,9 +70,12 @@ export async function registrarGasto(
     return { ok: false, error: parsed.error.issues[0]?.message };
   }
   const d = parsed.data;
+  const escuelaId = await getEscuelaActivaId();
+  if (!escuelaId) return { ok: false, error: "Sin escuela activa" };
 
   const supabase = await createClient();
   const { error } = await supabase.from("gastos").insert({
+    escuela_id: escuelaId,
     concepto: d.concepto,
     categoria: d.categoria,
     monto: d.monto,

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { getJugadores } from "@/lib/data/jugadores";
 import { getTodasCategorias } from "@/lib/data/categorias";
+import { getEscuelaActivaId } from "@/lib/data/escuelas";
 
 export default async function JugadoresPage({
   searchParams,
@@ -28,9 +29,11 @@ export default async function JugadoresPage({
   const profile = await requireProfile();
   const sp = await searchParams;
   const pagina = Math.max(1, Number(sp.pagina) || 1);
+  const escuelaId = await getEscuelaActivaId();
 
   const [{ jugadores, total, porPagina }, categorias] = await Promise.all([
     getJugadores({
+      escuelaId,
       categoriaId: sp.categoria || undefined,
       activo:
         sp.estado === "activo"
@@ -41,7 +44,7 @@ export default async function JugadoresPage({
       busqueda: sp.busqueda || undefined,
       pagina,
     }),
-    getTodasCategorias(),
+    getTodasCategorias(escuelaId),
   ]);
 
   const totalPaginas = Math.max(1, Math.ceil(total / porPagina));

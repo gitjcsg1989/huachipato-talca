@@ -3,12 +3,12 @@ import Image from "next/image";
 import { formatFecha } from "@/lib/utils";
 import type { Noticia } from "@/lib/db/schema";
 
-export function NewsCard({ noticia }: { noticia: Noticia }) {
+export function NewsCard({ noticia, base }: { noticia: Noticia; base: string }) {
   const img = noticia.imagenUrl;
 
   return (
     <Link
-      href={`/noticias/${noticia.slug}`}
+      href={`${base}/noticias/${noticia.slug}`}
       className="group flex flex-col overflow-hidden rounded-xl border border-white/[0.06] bg-surface-dark transition-colors hover:border-border-blue"
     >
       <div className="relative aspect-[16/9] overflow-hidden bg-white/5">

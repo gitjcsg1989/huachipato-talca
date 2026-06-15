@@ -12,6 +12,7 @@ import {
   getMensualidadesDeJugador,
 } from "@/lib/data/jugadores";
 import { getTodasCategorias } from "@/lib/data/categorias";
+import { getEscuelaActivaId } from "@/lib/data/escuelas";
 import { calcularEdad, formatCLP, nombreMes } from "@/lib/utils";
 
 const ETIQUETA_ESTADO: Record<string, { txt: string; cls: string }> = {
@@ -33,7 +34,7 @@ export default async function FichaJugadorPage({
 
   const anio = new Date().getFullYear();
   const [categorias, mensualidades] = await Promise.all([
-    getTodasCategorias(),
+    getTodasCategorias(await getEscuelaActivaId()),
     getMensualidadesDeJugador(id, anio),
   ]);
 

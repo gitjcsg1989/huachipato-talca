@@ -4,15 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getNoticiaPorSlug } from "@/lib/data/contenido";
+import { getEscuelaPorSlug } from "@/lib/data/escuelas";
 import { formatFecha } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ escuela: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const noticia = await getNoticiaPorSlug(slug);
+  const { escuela: escSlug, slug } = await params;
+  const escuela = await getEscuelaPorSlug(escSlug);
+  const noticia = escuela ? await getNoticiaPorSlug(escuela.id, slug) : null;
   if (!noticia) return { title: "Noticia no encontrada" };
   return {
     title: noticia.titulo,
@@ -24,11 +26,14 @@ export async function generateMetadata({
 export default async function NoticiaPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ escuela: string; slug: string }>;
 }) {
-  const { slug } = await params;
-  const noticia = await getNoticiaPorSlug(slug);
+  const { escuela: escSlug, slug } = await params;
+  const escuela = await getEscuelaPorSlug(escSlug);
+  if (!escuela) notFound();
+  const noticia = await getNoticiaPorSlug(escuela.id, slug);
   if (!noticia || !noticia.publicada) notFound();
+  const base = `/${escSlug}`;
 
   const parrafos = (noticia.contenido ?? "")
     .split(/\n{2,}|\n/)
@@ -38,7 +43,7 @@ export default async function NoticiaPage({
   return (
     <article className="mx-auto max-w-3xl px-5 py-12 lg:px-8">
       <Link
-        href="/noticias"
+        href={`${base}/noticias`}
         className="mb-8 inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-white"
       >
         <ArrowLeft size={15} />

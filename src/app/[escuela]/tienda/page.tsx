@@ -1,19 +1,22 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { Section, SectionHeader } from "@/components/public/Section";
 import { TiendaGrid } from "@/components/public/TiendaGrid";
-import { getProductosDisponibles, getAjustesSitio } from "@/lib/data/contenido";
+import { getEscuelaPorSlug } from "@/lib/data/escuelas";
+import { getProductosDisponibles } from "@/lib/data/contenido";
 
-export const metadata: Metadata = {
-  title: "Tienda",
-  description:
-    "Indumentaria y accesorios oficiales de la Academia de Fútbol Huachipato Talca.",
-};
+export const metadata: Metadata = { title: "Tienda" };
 
-export default async function TiendaPage() {
-  const [productos, ajustes] = await Promise.all([
-    getProductosDisponibles(),
-    getAjustesSitio(),
-  ]);
+export default async function TiendaPage({
+  params,
+}: {
+  params: Promise<{ escuela: string }>;
+}) {
+  const { escuela: slug } = await params;
+  const escuela = await getEscuelaPorSlug(slug);
+  if (!escuela) notFound();
+
+  const productos = await getProductosDisponibles(escuela.id);
 
   return (
     <Section>
@@ -29,8 +32,8 @@ export default async function TiendaPage() {
       ) : (
         <TiendaGrid
           productos={productos}
-          datosTransferencia={ajustes?.datosTransferencia}
-          telefonoWhatsapp={ajustes?.telefonoWhatsapp}
+          datosTransferencia={escuela.datosTransferencia}
+          telefonoWhatsapp={escuela.telefonoWhatsapp}
         />
       )}
     </Section>

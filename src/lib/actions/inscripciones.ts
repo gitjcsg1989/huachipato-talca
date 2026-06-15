@@ -40,6 +40,7 @@ export async function aprobarInscripcion(
   const { data: jugador, error: errJugador } = await supabase
     .from("jugadores")
     .insert({
+      escuela_id: inscripcion.escuelaId,
       nombre: inscripcion.nombreNino,
       apellido: apellido || "—",
       fecha_nacimiento: inscripcion.fechaNacimiento,

@@ -13,12 +13,13 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { getGastos } from "@/lib/data/finanzas";
+import { getEscuelaActivaId } from "@/lib/data/escuelas";
 import { CATEGORIAS_GASTO } from "@/types";
 import { formatCLP, formatFecha } from "@/lib/utils";
 
 export default async function GastosPage() {
   const profile = await requireProfile();
-  const gastos = await getGastos();
+  const gastos = await getGastos(await getEscuelaActivaId());
 
   return (
     <>

@@ -22,16 +22,28 @@ const ABREV = [
   "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
 ];
 
-export async function getResumenFinanzas(anio: number): Promise<ResumenFinanzas> {
+export async function getResumenFinanzas(
+  escuelaId: string | null,
+  anio: number,
+): Promise<ResumenFinanzas> {
+  const vacio: ResumenFinanzas = {
+    totalIngresos: 0,
+    totalGastos: 0,
+    balance: 0,
+    porMes: [],
+    ultimosIngresos: [],
+    ultimosGastos: [],
+  };
+  if (!escuelaId) return vacio;
   const supabase = await createClient();
   const desde = `${anio}-01-01`;
   const hasta = `${anio}-12-31`;
 
   const [ingRes, gasRes, ultIng, ultGas] = await Promise.all([
-    supabase.from("ingresos").select("monto, fecha").gte("fecha", desde).lte("fecha", hasta),
-    supabase.from("gastos").select("monto, fecha").gte("fecha", desde).lte("fecha", hasta),
-    supabase.from("ingresos").select("*").order("fecha", { ascending: false }).limit(5),
-    supabase.from("gastos").select("*").order("fecha", { ascending: false }).limit(5),
+    supabase.from("ingresos").select("monto, fecha").eq("escuela_id", escuelaId).gte("fecha", desde).lte("fecha", hasta),
+    supabase.from("gastos").select("monto, fecha").eq("escuela_id", escuelaId).gte("fecha", desde).lte("fecha", hasta),
+    supabase.from("ingresos").select("*").eq("escuela_id", escuelaId).order("fecha", { ascending: false }).limit(5),
+    supabase.from("gastos").select("*").eq("escuela_id", escuelaId).order("fecha", { ascending: false }).limit(5),
   ]);
 
   const porMes: PuntoMes[] = ABREV.map((m) => ({ mes: m, ingresos: 0, gastos: 0 }));
@@ -59,21 +71,25 @@ export async function getResumenFinanzas(anio: number): Promise<ResumenFinanzas>
   };
 }
 
-export async function getIngresos(): Promise<Ingreso[]> {
+export async function getIngresos(escuelaId: string | null): Promise<Ingreso[]> {
+  if (!escuelaId) return [];
   const supabase = await createClient();
   const { data } = await supabase
     .from("ingresos")
     .select("*")
+    .eq("escuela_id", escuelaId)
     .order("fecha", { ascending: false })
     .limit(100);
   return toCamel<Ingreso[]>(data ?? []);
 }
 
-export async function getGastos(): Promise<Gasto[]> {
+export async function getGastos(escuelaId: string | null): Promise<Gasto[]> {
+  if (!escuelaId) return [];
   const supabase = await createClient();
   const { data } = await supabase
     .from("gastos")
     .select("*")
+    .eq("escuela_id", escuelaId)
     .order("fecha", { ascending: false })
     .limit(100);
   return toCamel<Gasto[]>(data ?? []);

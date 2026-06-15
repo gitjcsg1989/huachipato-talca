@@ -13,12 +13,13 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { getIngresos } from "@/lib/data/finanzas";
+import { getEscuelaActivaId } from "@/lib/data/escuelas";
 import { CATEGORIAS_INGRESO } from "@/types";
 import { formatCLP, formatFecha } from "@/lib/utils";
 
 export default async function IngresosPage() {
   const profile = await requireProfile();
-  const ingresos = await getIngresos();
+  const ingresos = await getIngresos(await getEscuelaActivaId());
 
   return (
     <>

@@ -15,6 +15,7 @@ import {
   ShoppingBag,
   SlidersHorizontal,
   UserCog,
+  Building2,
 } from "lucide-react";
 import { logoutAction } from "@/lib/auth/actions";
 import { Logo } from "@/components/public/Logo";
@@ -49,11 +50,13 @@ export function Sidebar({
   rol,
   esSuperadmin,
   inscripcionesPendientes,
+  escuelaNombre,
 }: {
   nombre: string;
   rol: string;
   esSuperadmin: boolean;
   inscripcionesPendientes: number;
+  escuelaNombre: string;
 }) {
   const pathname = usePathname();
   const activo = (href: string, exact?: boolean) =>
@@ -61,8 +64,11 @@ export function Sidebar({
 
   return (
     <aside className="hidden w-64 shrink-0 flex-col bg-nav text-white lg:flex">
-      <div className="flex h-16 items-center border-b border-white/[0.06] px-5">
-        <Logo size={30} />
+      <div className="border-b border-white/[0.06] px-5 py-3">
+        <Logo size={28} />
+        <p className="mt-2 truncate text-[11px] font-medium text-white/40">
+          {escuelaNombre}
+        </p>
       </div>
 
       <nav className="flex-1 space-y-1 p-3">
@@ -114,18 +120,35 @@ export function Sidebar({
         })}
 
         {esSuperadmin && (
-          <Link
-            href="/dashboard/usuarios"
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-              activo("/dashboard/usuarios")
-                ? "bg-brand text-white"
-                : "text-white/60 hover:bg-white/5 hover:text-white",
-            )}
-          >
-            <Settings size={18} />
-            Usuarios
-          </Link>
+          <>
+            <p className="px-3 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wider text-white/30">
+              Plataforma
+            </p>
+            <Link
+              href="/dashboard/escuelas"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                activo("/dashboard/escuelas")
+                  ? "bg-brand text-white"
+                  : "text-white/60 hover:bg-white/5 hover:text-white",
+              )}
+            >
+              <Building2 size={18} />
+              Escuelas
+            </Link>
+            <Link
+              href="/dashboard/usuarios"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                activo("/dashboard/usuarios")
+                  ? "bg-brand text-white"
+                  : "text-white/60 hover:bg-white/5 hover:text-white",
+              )}
+            >
+              <Settings size={18} />
+              Usuarios
+            </Link>
+          </>
         )}
       </nav>
 

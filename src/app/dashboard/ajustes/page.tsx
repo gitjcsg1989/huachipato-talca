@@ -1,11 +1,11 @@
 import { requireProfile } from "@/lib/auth/guards";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { AjustesForm } from "@/components/dashboard/AjustesForm";
-import { getAjustesSitio } from "@/lib/data/contenido";
+import { getEscuelaActiva } from "@/lib/data/escuelas";
 
 export default async function AjustesDashboardPage() {
   const profile = await requireProfile();
-  const ajustes = await getAjustesSitio();
+  const ajustes = await getEscuelaActiva();
 
   return (
     <>

@@ -3,11 +3,12 @@ import { requireProfile } from "@/lib/auth/guards";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { getResumen } from "@/lib/data/dashboard";
+import { getEscuelaActivaId } from "@/lib/data/escuelas";
 import { formatCLP, nombreMes } from "@/lib/utils";
 
 export default async function DashboardHome() {
   const profile = await requireProfile();
-  const resumen = await getResumen();
+  const resumen = await getResumen(await getEscuelaActivaId());
   const mesActual = nombreMes(new Date().getMonth() + 1);
 
   return (

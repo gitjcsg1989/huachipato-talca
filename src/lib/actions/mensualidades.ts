@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { checkRole } from "@/lib/auth/guards";
+import { getEscuelaActivaId } from "@/lib/data/escuelas";
 
 export type ActionResult = { ok: boolean; error?: string };
 
@@ -18,10 +19,13 @@ export async function registrarPago(args: {
 }): Promise<ActionResult> {
   const profile = await checkRole("admin");
   if (!profile) return { ok: false, error: "No autorizado" };
+  const escuelaId = await getEscuelaActivaId();
+  if (!escuelaId) return { ok: false, error: "Sin escuela activa" };
 
   const supabase = await createClient();
   const { error } = await supabase.from("mensualidades").upsert(
     {
+      escuela_id: escuelaId,
       jugador_id: args.jugadorId,
       mes: args.mes,
       anio: args.anio,
@@ -74,10 +78,13 @@ export async function marcarExento(args: {
 }): Promise<ActionResult> {
   const profile = await checkRole("admin");
   if (!profile) return { ok: false, error: "No autorizado" };
+  const escuelaId = await getEscuelaActivaId();
+  if (!escuelaId) return { ok: false, error: "Sin escuela activa" };
 
   const supabase = await createClient();
   const { error } = await supabase.from("mensualidades").upsert(
     {
+      escuela_id: escuelaId,
       jugador_id: args.jugadorId,
       mes: args.mes,
       anio: args.anio,
@@ -103,17 +110,21 @@ export async function generarMensualidadesMes(
 ): Promise<ActionResult & { creadas?: number }> {
   const profile = await checkRole("admin");
   if (!profile) return { ok: false, error: "No autorizado" };
+  const escuelaId = await getEscuelaActivaId();
+  if (!escuelaId) return { ok: false, error: "Sin escuela activa" };
 
   const supabase = await createClient();
   const { data: jugadores } = await supabase
     .from("jugadores")
     .select("id")
+    .eq("escuela_id", escuelaId)
     .eq("activo", true);
 
   const ids = ((jugadores as { id: string }[] | null) ?? []).map((j) => j.id);
   if (ids.length === 0) return { ok: true, creadas: 0 };
 
   const filas = ids.map((id) => ({
+    escuela_id: escuelaId,
     jugador_id: id,
     mes,
     anio,

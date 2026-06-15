@@ -16,14 +16,17 @@ export interface GridMensualidades {
 }
 
 export async function getGridMensualidades(
+  escuelaId: string | null,
   anio: number,
   categoriaId?: string,
 ): Promise<GridMensualidades> {
+  if (!escuelaId) return { jugadores: [], celdas: new Map() };
   const supabase = await createClient();
 
   let qJug = supabase
     .from("jugadores")
     .select("id, nombre, apellido, categorias(nombre)")
+    .eq("escuela_id", escuelaId)
     .eq("activo", true)
     .order("apellido", { ascending: true });
   if (categoriaId) qJug = qJug.eq("categoria_id", categoriaId);

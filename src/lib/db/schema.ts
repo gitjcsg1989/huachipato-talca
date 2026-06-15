@@ -25,9 +25,33 @@ export const estadoMensualidad = pgEnum("estado_mensualidad", [
   "exento",
 ]);
 
+// ── escuelas ── (tenants)
+export const escuelas = pgTable("escuelas", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  slug: text("slug").notNull().unique(),
+  nombre: text("nombre").notNull(),
+  logoUrl: text("logo_url"),
+  colorPrimary: text("color_primary").notNull().default("#2952c8"),
+  colorPrimarySoft: text("color_primary_soft").notNull().default("#6a8ee0"),
+  heroTitulo: text("hero_titulo"),
+  heroSubtitulo: text("hero_subtitulo"),
+  telefonoWhatsapp: text("telefono_whatsapp"),
+  emailContacto: text("email_contacto"),
+  datosTransferencia: text("datos_transferencia"),
+  instagram: text("instagram"),
+  facebook: text("facebook"),
+  horarioEntrenamiento: text("horario_entrenamiento"),
+  direccion: text("direccion"),
+  activa: boolean("activa").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 // ── profiles ── (usuarios internos del panel; id = auth.users.id)
 export const profiles = pgTable("profiles", {
   id: uuid("id").primaryKey(),
+  escuelaId: uuid("escuela_id").references(() => escuelas.id),
   nombre: text("nombre").notNull(),
   email: text("email").notNull().unique(),
   rol: rolUsuario("rol").notNull().default("admin"),
@@ -40,6 +64,7 @@ export const profiles = pgTable("profiles", {
 // ── categorias ──
 export const categorias = pgTable("categorias", {
   id: uuid("id").primaryKey().defaultRandom(),
+  escuelaId: uuid("escuela_id").references(() => escuelas.id),
   nombre: text("nombre").notNull(),
   slug: text("slug").notNull().unique(),
   anioMin: integer("anio_min").notNull(),
@@ -50,6 +75,7 @@ export const categorias = pgTable("categorias", {
 // ── jugadores ──
 export const jugadores = pgTable("jugadores", {
   id: uuid("id").primaryKey().defaultRandom(),
+  escuelaId: uuid("escuela_id").references(() => escuelas.id),
   nombre: text("nombre").notNull(),
   apellido: text("apellido").notNull(),
   rut: text("rut").unique(),
@@ -75,6 +101,7 @@ export const jugadores = pgTable("jugadores", {
 // ── inscripciones ── (solicitudes del formulario público)
 export const inscripciones = pgTable("inscripciones", {
   id: uuid("id").primaryKey().defaultRandom(),
+  escuelaId: uuid("escuela_id").references(() => escuelas.id),
   nombreNino: text("nombre_nino").notNull(),
   fechaNacimiento: date("fecha_nacimiento").notNull(),
   nombreApoderado: text("nombre_apoderado").notNull(),
@@ -95,6 +122,7 @@ export const mensualidades = pgTable(
   "mensualidades",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    escuelaId: uuid("escuela_id").references(() => escuelas.id),
     jugadorId: uuid("jugador_id")
       .notNull()
       .references(() => jugadores.id, { onDelete: "cascade" }),
@@ -118,6 +146,7 @@ export const mensualidades = pgTable(
 // ── ingresos ──
 export const ingresos = pgTable("ingresos", {
   id: uuid("id").primaryKey().defaultRandom(),
+  escuelaId: uuid("escuela_id").references(() => escuelas.id),
   concepto: text("concepto").notNull(),
   categoria: text("categoria").notNull(),
   monto: integer("monto").notNull(),
@@ -135,6 +164,7 @@ export const ingresos = pgTable("ingresos", {
 // ── gastos ──
 export const gastos = pgTable("gastos", {
   id: uuid("id").primaryKey().defaultRandom(),
+  escuelaId: uuid("escuela_id").references(() => escuelas.id),
   concepto: text("concepto").notNull(),
   categoria: text("categoria").notNull(),
   monto: integer("monto").notNull(),
@@ -152,6 +182,7 @@ export const gastos = pgTable("gastos", {
 // ── Contenido del sitio (gestionado desde el panel) ──
 export const noticias = pgTable("noticias", {
   id: uuid("id").primaryKey().defaultRandom(),
+  escuelaId: uuid("escuela_id").references(() => escuelas.id),
   titulo: text("titulo").notNull(),
   slug: text("slug").notNull().unique(),
   fecha: date("fecha").notNull().default(sql`CURRENT_DATE`),
@@ -167,6 +198,7 @@ export const noticias = pgTable("noticias", {
 
 export const galeriaFotos = pgTable("galeria_fotos", {
   id: uuid("id").primaryKey().defaultRandom(),
+  escuelaId: uuid("escuela_id").references(() => escuelas.id),
   titulo: text("titulo"),
   fotoUrl: text("foto_url").notNull(),
   fecha: date("fecha").notNull().default(sql`CURRENT_DATE`),
@@ -178,6 +210,7 @@ export const galeriaFotos = pgTable("galeria_fotos", {
 
 export const productos = pgTable("productos", {
   id: uuid("id").primaryKey().defaultRandom(),
+  escuelaId: uuid("escuela_id").references(() => escuelas.id),
   nombre: text("nombre").notNull(),
   descripcion: text("descripcion"),
   precio: integer("precio").notNull().default(0),
@@ -193,6 +226,7 @@ export const productos = pgTable("productos", {
 
 export const cuerpoTecnico = pgTable("cuerpo_tecnico", {
   id: uuid("id").primaryKey().defaultRandom(),
+  escuelaId: uuid("escuela_id").references(() => escuelas.id),
   nombre: text("nombre").notNull(),
   cargo: text("cargo").notNull(),
   fotoUrl: text("foto_url"),
@@ -236,6 +270,8 @@ export type Producto = typeof productos.$inferSelect;
 export type GaleriaFoto = typeof galeriaFotos.$inferSelect;
 export type Ajustes = typeof ajustes.$inferSelect;
 export type MiembroTecnico = typeof cuerpoTecnico.$inferSelect;
+export type Escuela = typeof escuelas.$inferSelect;
+export type NuevaEscuela = typeof escuelas.$inferInsert;
 
 export type Rol = (typeof rolUsuario.enumValues)[number];
 export type EstadoInscripcion = (typeof estadoInscripcion.enumValues)[number];

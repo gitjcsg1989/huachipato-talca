@@ -1,21 +1,25 @@
 import type { Metadata } from "next";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
+import { notFound } from "next/navigation";
 import { Section } from "@/components/public/Section";
 import { InscripcionForm } from "@/components/public/InscripcionForm";
-import { getAjustesSitio } from "@/lib/data/contenido";
+import { getEscuelaPorSlug } from "@/lib/data/escuelas";
 import { getCategoriasActivas } from "@/lib/data/categorias";
 
 export const metadata: Metadata = {
   title: "Contacto e Inscripciones",
-  description:
-    "Inscribe a tu hijo/a en la Academia de Fútbol Huachipato Talca o contáctanos.",
+  description: "Inscribe a tu hijo/a en la academia o contáctanos.",
 };
 
-export default async function ContactoPage() {
-  const [ajustes, categorias] = await Promise.all([
-    getAjustesSitio(),
-    getCategoriasActivas(),
-  ]);
+export default async function ContactoPage({
+  params,
+}: {
+  params: Promise<{ escuela: string }>;
+}) {
+  const { escuela: slug } = await params;
+  const ajustes = await getEscuelaPorSlug(slug);
+  if (!ajustes) notFound();
+  const categorias = await getCategoriasActivas(ajustes.id);
 
   const nombresCategorias = categorias.map((c) => c.nombre);
 
@@ -64,7 +68,7 @@ export default async function ContactoPage() {
           <h2 className="mb-6 text-xl font-bold text-white">
             Formulario de inscripción
           </h2>
-          <InscripcionForm categorias={nombresCategorias} />
+          <InscripcionForm categorias={nombresCategorias} escuelaId={ajustes.id} />
         </div>
       </div>
     </Section>

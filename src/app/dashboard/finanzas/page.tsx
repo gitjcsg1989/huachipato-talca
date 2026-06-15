@@ -4,6 +4,7 @@ import { Topbar } from "@/components/dashboard/Topbar";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { FinanzasChart } from "@/components/dashboard/FinanzasChart";
 import { getResumenFinanzas } from "@/lib/data/finanzas";
+import { getEscuelaActivaId } from "@/lib/data/escuelas";
 import { formatCLP, formatFecha } from "@/lib/utils";
 
 export default async function FinanzasPage({
@@ -14,7 +15,7 @@ export default async function FinanzasPage({
   const profile = await requireProfile();
   const sp = await searchParams;
   const anio = Number(sp.anio) || new Date().getFullYear();
-  const r = await getResumenFinanzas(anio);
+  const r = await getResumenFinanzas(await getEscuelaActivaId(), anio);
 
   return (
     <>

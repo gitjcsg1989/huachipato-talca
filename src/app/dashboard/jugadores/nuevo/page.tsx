@@ -4,10 +4,11 @@ import { requireProfile } from "@/lib/auth/guards";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { JugadorForm } from "@/components/dashboard/JugadorForm";
 import { getTodasCategorias } from "@/lib/data/categorias";
+import { getEscuelaActivaId } from "@/lib/data/escuelas";
 
 export default async function NuevoJugadorPage() {
   const profile = await requireProfile();
-  const categorias = await getTodasCategorias();
+  const categorias = await getTodasCategorias(await getEscuelaActivaId());
 
   return (
     <>

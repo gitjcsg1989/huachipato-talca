@@ -15,7 +15,13 @@ import { Button } from "@/components/ui/button";
 const inputCls =
   "bg-white/5 border-white/10 text-white placeholder:text-white/30";
 
-export function InscripcionForm({ categorias }: { categorias: string[] }) {
+export function InscripcionForm({
+  categorias,
+  escuelaId,
+}: {
+  categorias: string[];
+  escuelaId: string;
+}) {
   const {
     register,
     handleSubmit,
@@ -30,7 +36,7 @@ export function InscripcionForm({ categorias }: { categorias: string[] }) {
       const res = await fetch("/api/inscripciones", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, escuela_id: escuelaId }),
       });
       const json = await res.json();
       if (!res.ok || !json.ok) {

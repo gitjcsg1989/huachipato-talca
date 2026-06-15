@@ -1,26 +1,31 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Section, SectionHeader } from "@/components/public/Section";
 import { NewsCard } from "@/components/public/NewsCard";
+import { getEscuelaPorSlug } from "@/lib/data/escuelas";
 import { getNoticias } from "@/lib/data/contenido";
 
-export const metadata: Metadata = {
-  title: "Noticias",
-  description:
-    "Noticias, resultados y comunicados de la Academia de Fútbol Huachipato Talca.",
-};
+export const metadata: Metadata = { title: "Noticias" };
 
 const POR_PAGINA = 9;
 
 export default async function NoticiasPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ escuela: string }>;
   searchParams: Promise<{ pagina?: string }>;
 }) {
+  const { escuela: slug } = await params;
+  const escuela = await getEscuelaPorSlug(slug);
+  if (!escuela) notFound();
+  const base = `/${slug}`;
+
   const { pagina } = await searchParams;
   const p = Math.max(1, Number(pagina) || 1);
 
-  const { noticias, total } = await getNoticias({
+  const { noticias, total } = await getNoticias(escuela.id, {
     pagina: p,
     porPagina: POR_PAGINA,
     soloPublicadas: true,
@@ -42,7 +47,7 @@ export default async function NoticiasPage({
         <>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {noticias.map((n) => (
-              <NewsCard key={n.id} noticia={n} />
+              <NewsCard key={n.id} noticia={n} base={base} />
             ))}
           </div>
 
@@ -51,7 +56,7 @@ export default async function NoticiasPage({
               {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((n) => (
                 <Link
                   key={n}
-                  href={n === 1 ? "/noticias" : `/noticias?pagina=${n}`}
+                  href={n === 1 ? `${base}/noticias` : `${base}/noticias?pagina=${n}`}
                   className={
                     n === p
                       ? "rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white"

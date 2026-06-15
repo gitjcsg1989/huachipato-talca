@@ -2,10 +2,11 @@ import { requireProfile } from "@/lib/auth/guards";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { GaleriaAdmin } from "@/components/dashboard/GaleriaAdmin";
 import { getGaleria } from "@/lib/data/contenido";
+import { getEscuelaActivaId } from "@/lib/data/escuelas";
 
 export default async function GaleriaDashboardPage() {
   const profile = await requireProfile();
-  const fotos = await getGaleria();
+  const fotos = await getGaleria(await getEscuelaActivaId());
 
   return (
     <>

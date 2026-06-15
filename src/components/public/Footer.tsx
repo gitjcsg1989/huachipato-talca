@@ -3,27 +3,27 @@ import { MessageCircle } from "lucide-react";
 import { Logo } from "./Logo";
 import { InstagramIcon, FacebookIcon } from "./SocialIcons";
 import { NAV_PUBLICO } from "@/lib/navegacion";
-import { getAjustesSitio } from "@/lib/data/contenido";
 import { whatsappLink } from "@/lib/utils";
+import type { Escuela } from "@/lib/db/schema";
 
-export async function Footer() {
-  const ajustes = await getAjustesSitio();
+export function Footer({ escuela }: { escuela: Escuela }) {
   const anio = new Date().getFullYear();
+  const base = `/${escuela.slug}`;
+  const hrefDe = (h: string) => (h === "/" ? base : `${base}${h}`);
 
   return (
     <footer className="border-t border-white/[0.06] bg-nav">
       <div className="mx-auto max-w-[1280px] px-5 py-12 lg:px-8">
         <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr]">
           <div>
-            <Logo />
+            <Logo nombre={escuela.nombre} logoUrl={escuela.logoUrl} />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/50">
-              Formación deportiva y valores para niños y jóvenes de Talca, bajo
-              la marca del Club Deportivo Huachipato.
+              Formación deportiva y valores para niños y jóvenes.
             </p>
             <div className="mt-5 flex gap-3">
-              {ajustes?.instagram && (
+              {escuela.instagram && (
                 <a
-                  href={ajustes.instagram}
+                  href={escuela.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
@@ -32,9 +32,9 @@ export async function Footer() {
                   <InstagramIcon size={18} />
                 </a>
               )}
-              {ajustes?.facebook && (
+              {escuela.facebook && (
                 <a
-                  href={ajustes.facebook}
+                  href={escuela.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook"
@@ -43,9 +43,9 @@ export async function Footer() {
                   <FacebookIcon size={18} />
                 </a>
               )}
-              {ajustes?.telefonoWhatsapp && (
+              {escuela.telefonoWhatsapp && (
                 <a
-                  href={whatsappLink(ajustes.telefonoWhatsapp)}
+                  href={whatsappLink(escuela.telefonoWhatsapp)}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="WhatsApp"
@@ -65,7 +65,7 @@ export async function Footer() {
               {NAV_PUBLICO.map((item) => (
                 <li key={item.href}>
                   <Link
-                    href={item.href}
+                    href={hrefDe(item.href)}
                     className="text-sm text-white/60 hover:text-white"
                   >
                     {item.label}
@@ -80,9 +80,9 @@ export async function Footer() {
               Contacto
             </h3>
             <ul className="space-y-2.5 text-sm text-white/60">
-              {ajustes?.direccion && <li>{ajustes.direccion}</li>}
-              {ajustes?.telefonoWhatsapp && <li>{ajustes.telefonoWhatsapp}</li>}
-              {ajustes?.emailContacto && <li>{ajustes.emailContacto}</li>}
+              {escuela.direccion && <li>{escuela.direccion}</li>}
+              {escuela.telefonoWhatsapp && <li>{escuela.telefonoWhatsapp}</li>}
+              {escuela.emailContacto && <li>{escuela.emailContacto}</li>}
               <li>
                 <Link href="/login" className="text-white/40 hover:text-white">
                   Acceso al panel
@@ -93,8 +93,7 @@ export async function Footer() {
         </div>
 
         <div className="mt-10 border-t border-white/[0.06] pt-6 text-xs text-white/30">
-          © {anio} Academia de Fútbol Huachipato — Filial Talca. Todos los
-          derechos reservados.
+          © {anio} {escuela.nombre}. Todos los derechos reservados.
         </div>
       </div>
     </footer>

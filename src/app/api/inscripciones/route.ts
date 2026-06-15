@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabase
     .from("inscripciones")
     .insert({
+      escuela_id: datos.escuela_id,
       nombre_nino: datos.nombre_nino,
       fecha_nacimiento: datos.fecha_nacimiento,
       nombre_apoderado: datos.nombre_apoderado,

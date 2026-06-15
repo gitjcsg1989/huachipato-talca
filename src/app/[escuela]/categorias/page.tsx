@@ -1,23 +1,26 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { Section, SectionHeader } from "@/components/public/Section";
 import { CategoryCard } from "@/components/public/CategoryCard";
+import { getEscuelaPorSlug } from "@/lib/data/escuelas";
 import { getCategoriasActivas } from "@/lib/data/categorias";
-import { getCategoriasPublicas } from "@/lib/sanity/queries";
 
 export const metadata: Metadata = {
   title: "Categorías",
-  description:
-    "Categorías formativas de la Academia de Fútbol Huachipato Talca, desde Sub-6 hasta las series superiores.",
+  description: "Categorías formativas de la academia.",
 };
 
-export default async function CategoriasPage() {
-  const [categorias, contenido] = await Promise.all([
-    getCategoriasActivas(),
-    getCategoriasPublicas(),
-  ]);
-  const descPorSlug = new Map(
-    contenido.map((c) => [c.slug, c.descripcion]),
-  );
+export default async function CategoriasPage({
+  params,
+}: {
+  params: Promise<{ escuela: string }>;
+}) {
+  const { escuela: slug } = await params;
+  const escuela = await getEscuelaPorSlug(slug);
+  if (!escuela) notFound();
+  const base = `/${slug}`;
+
+  const categorias = await getCategoriasActivas(escuela.id);
 
   return (
     <Section>
@@ -35,11 +38,11 @@ export default async function CategoriasPage() {
           {categorias.map((c) => (
             <CategoryCard
               key={c.id}
+              base={base}
               nombre={c.nombre}
               slug={c.slug}
               anioMin={c.anioMin}
               anioMax={c.anioMax}
-              descripcion={descPorSlug.get(c.slug) ?? undefined}
             />
           ))}
         </div>

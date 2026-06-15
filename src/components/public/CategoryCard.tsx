@@ -2,12 +2,14 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 export function CategoryCard({
+  base,
   nombre,
   slug,
   anioMin,
   anioMax,
   descripcion,
 }: {
+  base: string;
   nombre: string;
   slug: string;
   anioMin: number;
@@ -16,7 +18,7 @@ export function CategoryCard({
 }) {
   return (
     <Link
-      href={`/categorias/${slug}`}
+      href={`${base}/categorias/${slug}`}
       className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-white/[0.06] bg-surface-dark p-6 transition-colors hover:border-border-blue"
     >
       <div className="absolute right-0 top-0 h-full w-1.5 bg-brand opacity-60" />

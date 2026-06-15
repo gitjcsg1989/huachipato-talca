@@ -7,6 +7,7 @@ export interface JugadorRow extends Jugador {
 }
 
 export interface FiltrosJugadores {
+  escuelaId: string | null;
   categoriaId?: string;
   activo?: boolean;
   busqueda?: string;
@@ -14,13 +15,16 @@ export interface FiltrosJugadores {
   porPagina?: number;
 }
 
-export async function getJugadores(filtros: FiltrosJugadores = {}) {
-  const { categoriaId, activo, busqueda, pagina = 1, porPagina = 20 } = filtros;
+export async function getJugadores(filtros: FiltrosJugadores) {
+  const { escuelaId, categoriaId, activo, busqueda, pagina = 1, porPagina = 20 } =
+    filtros;
+  if (!escuelaId) return { jugadores: [], total: 0, pagina, porPagina };
   const supabase = await createClient();
 
   let query = supabase
     .from("jugadores")
-    .select("*, categorias(id, nombre, slug)", { count: "exact" });
+    .select("*, categorias(id, nombre, slug)", { count: "exact" })
+    .eq("escuela_id", escuelaId);
 
   if (categoriaId) query = query.eq("categoria_id", categoriaId);
   if (typeof activo === "boolean") query = query.eq("activo", activo);

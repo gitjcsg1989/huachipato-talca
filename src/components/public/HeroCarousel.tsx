@@ -17,9 +17,11 @@ const SLIDES = [
 const INTERVALO = 3000;
 
 export function HeroCarousel({
+  base,
   titulo,
   subtitulo,
 }: {
+  base: string;
   titulo: string;
   subtitulo: string;
 }) {
@@ -76,14 +78,14 @@ export function HeroCarousel({
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/contacto"
+                href={`${base}/contacto`}
                 className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 font-semibold text-white transition-colors hover:bg-brand/90"
               >
                 Inscribir a mi hijo/a
                 <ArrowRight size={18} />
               </Link>
               <Link
-                href="/categorias"
+                href={`${base}/categorias`}
                 className="inline-flex items-center gap-2 rounded-lg border border-white/25 bg-white/5 px-6 py-3 font-semibold text-white backdrop-blur transition-colors hover:bg-white/10"
               >
                 Ver categorías

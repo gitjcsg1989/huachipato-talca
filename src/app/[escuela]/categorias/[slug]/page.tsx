@@ -2,22 +2,22 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, User, Clock } from "lucide-react";
+import { ArrowLeft, User } from "lucide-react";
 import {
   getCategoriaPorSlug,
   getJugadoresPublicosDeCategoria,
 } from "@/lib/data/categorias";
-import { getCategoriaPublicaPorSlug } from "@/lib/sanity/queries";
-import { imgUrl } from "@/lib/sanity/client";
+import { getEscuelaPorSlug } from "@/lib/data/escuelas";
 import { calcularEdad } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ escuela: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const cat = await getCategoriaPorSlug(slug);
+  const { escuela: escSlug, slug } = await params;
+  const escuela = await getEscuelaPorSlug(escSlug);
+  const cat = escuela ? await getCategoriaPorSlug(escuela.id, slug) : null;
   return cat
     ? { title: cat.nombre, description: `Categoría ${cat.nombre} de la academia.` }
     : { title: "Categoría no encontrada" };
@@ -26,23 +26,21 @@ export async function generateMetadata({
 export default async function CategoriaDetallePage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ escuela: string; slug: string }>;
 }) {
-  const { slug } = await params;
-  const categoria = await getCategoriaPorSlug(slug);
+  const { escuela: escSlug, slug } = await params;
+  const escuela = await getEscuelaPorSlug(escSlug);
+  if (!escuela) notFound();
+  const categoria = await getCategoriaPorSlug(escuela.id, slug);
   if (!categoria) notFound();
+  const base = `/${escSlug}`;
 
-  const [contenido, jugadores] = await Promise.all([
-    getCategoriaPublicaPorSlug(slug),
-    getJugadoresPublicosDeCategoria(categoria.id),
-  ]);
-
-  const img = imgUrl(contenido?.imagen, { width: 1280, height: 560 });
+  const jugadores = await getJugadoresPublicosDeCategoria(categoria.id);
 
   return (
     <div className="mx-auto max-w-4xl px-5 py-12 lg:px-8">
       <Link
-        href="/categorias"
+        href={`${base}/categorias`}
         className="mb-8 inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-white"
       >
         <ArrowLeft size={15} />
@@ -54,40 +52,6 @@ export default async function CategoriaDetallePage({
         Nacidos entre {categoria.anioMin} y {categoria.anioMax}
       </p>
 
-      {img && (
-        <div className="relative mt-8 aspect-[21/9] overflow-hidden rounded-xl">
-          <Image
-            src={img}
-            alt={categoria.nombre}
-            fill
-            sizes="(max-width:896px) 100vw, 896px"
-            className="object-cover"
-          />
-        </div>
-      )}
-
-      {contenido?.descripcion && (
-        <p className="mt-8 max-w-2xl leading-relaxed text-white/70">
-          {contenido.descripcion}
-        </p>
-      )}
-
-      <div className="mt-6 flex flex-wrap gap-6 text-sm text-white/60">
-        {contenido?.entrenador && (
-          <span className="inline-flex items-center gap-2">
-            <User size={16} className="text-brand-soft" />
-            {contenido.entrenador}
-          </span>
-        )}
-        {contenido?.horario && (
-          <span className="inline-flex items-center gap-2">
-            <Clock size={16} className="text-brand-soft" />
-            {contenido.horario}
-          </span>
-        )}
-      </div>
-
-      {/* Plantel */}
       <section className="mt-12">
         <h2 className="mb-4 text-xl font-bold text-white">
           Plantel ({jugadores.length})

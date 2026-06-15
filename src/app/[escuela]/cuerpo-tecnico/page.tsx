@@ -1,16 +1,22 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Section, SectionHeader } from "@/components/public/Section";
+import { getEscuelaPorSlug } from "@/lib/data/escuelas";
 import { getCuerpoTecnico } from "@/lib/data/contenido";
 
-export const metadata: Metadata = {
-  title: "Cuerpo Técnico",
-  description:
-    "Conoce a los entrenadores y profesionales de la Academia de Fútbol Huachipato Talca.",
-};
+export const metadata: Metadata = { title: "Cuerpo Técnico" };
 
-export default async function CuerpoTecnicoPage() {
-  const staff = await getCuerpoTecnico();
+export default async function CuerpoTecnicoPage({
+  params,
+}: {
+  params: Promise<{ escuela: string }>;
+}) {
+  const { escuela: slug } = await params;
+  const escuela = await getEscuelaPorSlug(slug);
+  if (!escuela) notFound();
+
+  const staff = await getCuerpoTecnico(escuela.id);
 
   return (
     <Section>

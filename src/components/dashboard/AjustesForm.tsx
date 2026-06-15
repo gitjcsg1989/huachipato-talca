@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { guardarAjustes } from "@/lib/actions/contenido";
-import type { Ajustes } from "@/lib/db/schema";
+import type { Escuela } from "@/lib/db/schema";
 
-export function AjustesForm({ ajustes }: { ajustes: Ajustes | null }) {
+export function AjustesForm({ ajustes }: { ajustes: Escuela | null }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 

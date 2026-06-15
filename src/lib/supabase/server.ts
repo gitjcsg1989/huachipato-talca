@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { cache } from "react";
+import { toCamel } from "@/lib/utils";
 import type { Profile, Rol } from "@/lib/db/schema";
 
 /**
@@ -82,7 +83,7 @@ export const getProfile = cache(async (): Promise<Profile | null> => {
     .select("*")
     .eq("id", user.id)
     .single();
-  return (data as Profile | null) ?? null;
+  return data ? toCamel<Profile>(data) : null;
 });
 
 const RANGO: Record<Rol, number> = { admin: 1, superadmin: 2 };

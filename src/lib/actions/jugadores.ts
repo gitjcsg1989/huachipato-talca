@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { checkRole } from "@/lib/auth/guards";
+import { getEscuelaActivaId } from "@/lib/data/escuelas";
 import { jugadorSchema } from "@/lib/validators";
 
 export type ActionResult = { ok: boolean; error?: string; id?: string };
@@ -33,10 +34,14 @@ export async function crearJugador(formData: FormData): Promise<ActionResult> {
   }
   const d = parsed.data;
 
+  const escuelaId = await getEscuelaActivaId();
+  if (!escuelaId) return { ok: false, error: "Sin escuela activa" };
+
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("jugadores")
     .insert({
+      escuela_id: escuelaId,
       nombre: d.nombre,
       apellido: d.apellido,
       rut: d.rut || null,

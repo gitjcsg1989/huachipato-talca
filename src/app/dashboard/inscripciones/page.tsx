@@ -4,6 +4,7 @@ import { Topbar } from "@/components/dashboard/Topbar";
 import { InscripcionesTabla } from "@/components/dashboard/InscripcionesTabla";
 import { getInscripciones } from "@/lib/data/inscripciones";
 import { getTodasCategorias } from "@/lib/data/categorias";
+import { getEscuelaActivaId } from "@/lib/data/escuelas";
 import { cn } from "@/lib/utils";
 import type { EstadoInscripcion } from "@/lib/db/schema";
 
@@ -23,9 +24,10 @@ export default async function InscripcionesPage({
   const { estado } = await searchParams;
   const filtro = (estado ?? "pendiente") as EstadoInscripcion | "";
 
+  const escuelaId = await getEscuelaActivaId();
   const [inscripciones, categorias] = await Promise.all([
-    getInscripciones(filtro || undefined),
-    getTodasCategorias(),
+    getInscripciones(escuelaId, filtro || undefined),
+    getTodasCategorias(escuelaId),
   ]);
 
   return (

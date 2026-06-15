@@ -1,16 +1,22 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { Section, SectionHeader } from "@/components/public/Section";
 import { GaleriaPublica } from "@/components/public/GaleriaPublica";
+import { getEscuelaPorSlug } from "@/lib/data/escuelas";
 import { getGaleria } from "@/lib/data/contenido";
 
-export const metadata: Metadata = {
-  title: "Galería",
-  description:
-    "Fotos de partidos, entrenamientos y actividades de la Academia Huachipato Talca.",
-};
+export const metadata: Metadata = { title: "Galería" };
 
-export default async function GaleriaPage() {
-  const fotos = await getGaleria();
+export default async function GaleriaPage({
+  params,
+}: {
+  params: Promise<{ escuela: string }>;
+}) {
+  const { escuela: slug } = await params;
+  const escuela = await getEscuelaPorSlug(slug);
+  if (!escuela) notFound();
+
+  const fotos = await getGaleria(escuela.id);
 
   return (
     <Section>

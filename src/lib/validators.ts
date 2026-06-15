@@ -10,6 +10,7 @@ export const PARENTESCOS = [
 ] as const;
 
 export const inscripcionSchema = z.object({
+  escuela_id: z.string().uuid("Escuela inválida"),
   nombre_nino: z.string().min(2, "Ingresa el nombre del niño/a"),
   fecha_nacimiento: z
     .string()

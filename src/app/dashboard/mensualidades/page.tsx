@@ -8,6 +8,7 @@ import {
 import { MensualidadCategoriaFiltro } from "@/components/dashboard/MensualidadCategoriaFiltro";
 import { getGridMensualidades } from "@/lib/data/mensualidades";
 import { getTodasCategorias } from "@/lib/data/categorias";
+import { getEscuelaActivaId } from "@/lib/data/escuelas";
 
 export default async function MensualidadesPage({
   searchParams,
@@ -18,9 +19,10 @@ export default async function MensualidadesPage({
   const sp = await searchParams;
   const anio = Number(sp.anio) || new Date().getFullYear();
 
+  const escuelaId = await getEscuelaActivaId();
   const [{ jugadores, celdas }, categorias] = await Promise.all([
-    getGridMensualidades(anio, sp.categoria || undefined),
-    getTodasCategorias(),
+    getGridMensualidades(escuelaId, anio, sp.categoria || undefined),
+    getTodasCategorias(escuelaId),
   ]);
 
   // Serializar el Map a record plano para el client component

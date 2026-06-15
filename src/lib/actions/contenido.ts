@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { checkRole } from "@/lib/auth/guards";
+import { getEscuelaActivaId } from "@/lib/data/escuelas";
 import { slugify } from "@/lib/utils";
 
 export type ActionResult = { ok: boolean; error?: string; url?: string };
@@ -65,7 +66,11 @@ export async function guardarNoticia(
   const titulo = fd(formData, "titulo");
   if (titulo.length < 3) return { ok: false, error: "El título es muy corto" };
 
+  const escuelaId = await getEscuelaActivaId();
+  if (!escuelaId) return { ok: false, error: "Sin escuela activa" };
+
   const fila = {
+    escuela_id: escuelaId,
     titulo,
     slug: fd(formData, "slug") || slugify(titulo) || `noticia-${Date.now()}`,
     fecha: fd(formData, "fecha") || new Date().toISOString().slice(0, 10),
@@ -127,7 +132,11 @@ export async function guardarProducto(
   if (Number.isNaN(precio) || precio < 0)
     return { ok: false, error: "Precio inválido" };
 
+  const escuelaId = await getEscuelaActivaId();
+  if (!escuelaId) return { ok: false, error: "Sin escuela activa" };
+
   const fila = {
+    escuela_id: escuelaId,
     nombre,
     descripcion: fd(formData, "descripcion") || null,
     precio,
@@ -173,11 +182,15 @@ export async function subirFotoGaleria(
   if (!(file instanceof File) || file.size === 0)
     return { ok: false, error: "No se recibió ninguna imagen" };
 
+  const escuelaId = await getEscuelaActivaId();
+  if (!escuelaId) return { ok: false, error: "Sin escuela activa" };
+
   const { url, error } = await subirArchivo("galeria", file);
   if (error) return { ok: false, error };
 
   const supabase = await createClient();
   const { error: dbErr } = await supabase.from("galeria_fotos").insert({
+    escuela_id: escuelaId,
     foto_url: url,
     titulo: fd(formData, "titulo") || null,
   });
@@ -214,7 +227,11 @@ export async function guardarMiembro(
   if (nombre.length < 2) return { ok: false, error: "Nombre inválido" };
   if (cargo.length < 2) return { ok: false, error: "Indica el cargo" };
 
+  const escuelaId = await getEscuelaActivaId();
+  if (!escuelaId) return { ok: false, error: "Sin escuela activa" };
+
   const fila = {
+    escuela_id: escuelaId,
     nombre,
     cargo,
     foto_url: fd(formData, "foto_url") || null,
@@ -252,9 +269,10 @@ export async function guardarAjustes(
 ): Promise<ActionResult> {
   const profile = await checkRole("admin");
   if (!profile) return { ok: false, error: "No autorizado" };
+  const escuelaId = await getEscuelaActivaId();
+  if (!escuelaId) return { ok: false, error: "Sin escuela activa" };
 
   const fila = {
-    id: 1,
     hero_titulo: fd(formData, "hero_titulo") || null,
     hero_subtitulo: fd(formData, "hero_subtitulo") || null,
     telefono_whatsapp: fd(formData, "telefono_whatsapp") || null,
@@ -268,8 +286,9 @@ export async function guardarAjustes(
 
   const supabase = await createClient();
   const { error } = await supabase
-    .from("ajustes")
-    .upsert(fila, { onConflict: "id" });
+    .from("escuelas")
+    .update(fila)
+    .eq("id", escuelaId);
   if (error) {
     console.error("Error guardando ajustes:", error);
     return { ok: false, error: "No se pudieron guardar los ajustes" };
